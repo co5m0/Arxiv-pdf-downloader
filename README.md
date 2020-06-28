@@ -1,6 +1,6 @@
-This is a simpl Python script to obtain direct links for download pdf from Arxiv archive.
+This is a simple Python script to obtain direct links for download pdf from Arxiv archive.
 
-# How it work
+# How it works
 The script will generate:
 
  1.  `index.txt` ( file contains a list of link )
