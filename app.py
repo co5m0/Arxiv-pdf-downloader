@@ -3,10 +3,6 @@ import requests
 import json
 import os
 import sys
-import tarfile
-from multiprocessing import Pool, cpu_count
-import urllib.request
-
 
 base_url = 'https://archive.org/download'
 
@@ -18,13 +14,13 @@ def download_file(file,url):
     file_tmp = urllib.request.urlretrieve(url, filename=None)[0]
 
 def main():
-    print(cpu_count())
     number_of_id = sys.argv[1]
 
     subject_counter = dict()
 
 
     json_url = 'https://archive.org/advancedsearch.php?q=mediatype%3A%28texts%29+AND+collection%3A%28arxiv%29&fl%5B%5D=identifier&fl%5B%5D=subject&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows={}&page=1&output=json'.format(number_of_id)
+    # json_url = 'https://archive.org/advancedsearch.php?q=collection%3A%28arXiv%29+AND+mediatype%3A%28texts%29&fl%5B%5D=identifier&fl%5B%5D=subject&sort%5B%5D=&sort%5B%5D=&sort%5B%5D=&rows={}&page=1&output=json'.format(number_of_id)
 
     out_file = 'index.txt'
     subject_csv = 'subjects.csv'
@@ -37,20 +33,22 @@ def main():
             print(obj)
             id = obj['identifier']
             code.write('{}/{}/{}.pdf\n'.format(base_url,id,id[6:]))
-            for subs in obj['subject']:
-                print(subs)
-                subject_counter.setdefault(subs,0)
-                subject_counter[subs] += 1
-            # response_tar = requests.get('{}/{}/{}.tar\n'.format(base_url,id['identifier'],id['identifier']))
-            # download_and_extract(id['identifier'])
-            # print(download_file(id['identifier'],'{}/{}/{}.tar\n'.format(base_url,id['identifier'],id['identifier'])))
+            # if obj['subject']:
+            try:
+                for subs in obj['subject']:
+                    print(subs)
+                    subject_counter.setdefault(subs,0)
+                    subject_counter[subs] += 1
+            except KeyError:
+                print ("Doesn't exist")
+            else:
+                continue
     with open(subject_csv, "w") as csvfile:
         fieldnames = ['subject', 'occurency']
         spamwriter = csv.DictWriter(csvfile, fieldnames=fieldnames)
         spamwriter.writeheader()
         for subs in subject_counter:
             spamwriter.writerow({'subject':subs, 'occurency':subject_counter[subs]})
-            # spamwriter.writerow([subs,subject_counter[subs]])
     print(subject_counter)
 
     try:
